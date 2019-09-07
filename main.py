@@ -17,28 +17,21 @@ class Game:
         pygame.display.set_caption(name)
 
         self.screen = pygame.display.set_mode(settings.screen_tuple)
-        self.size = self.screen.get_size()
-                                                
-        self.insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", self.size[0] - wh, self.size[1] - wh, (193, 206, 99), 90, self)
-        self.bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", 0, 0, (203, wh, 46), -90, self)
-        
+                           
+        self.insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", settings.screen_tuple[0] - wh, settings.screen_tuple[1] - wh, settings.colors["green"], 90, self)
+        self.bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", 0, 0, settings.colors["red"], -90, self)
+    
         self.tempo_attuale = 0
         self.durata_partita = 100
-        
         self.blocks = self.generate_map()
-
         self.primo_blocco(self.insalata)
         self.primo_blocco(self.bistecca)
-
         self.dt = 0
-        
         self.loop_status = True
-
         self.play_music()
-        self.time_booty = 0 
-        self.rate_booty = settings.clock["rate_booty"]
         self.booty = False
-
+        self.rate_booty = settings.clock["rate_booty"]
+        self.time_booty = 0
         self.random_block = False
 
     def primo_blocco(self, character):

@@ -6,63 +6,52 @@ wh = settings.blocks["wh"]
 class Character(pygame.sprite.Sprite):
     def __init__ (self, name, filename, x, y, color, initial_angle, game):
         pygame.sprite.Sprite. __init__ (self) 
-        self.frame = 0
-        self.filename = filename
-        self.images = self.load_images(7) 
         self.angle = initial_angle
-        self.image = pygame.transform.rotate(self.images[self.frame], self.angle)
-        self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = x, y
-        self.color = color
-        self.time = 0
-        self.rate = 0.05
         self.animate_status = False
+        self.color = color
+        self.filename = filename
+        self.frame = 0
+        self.game = game
+        self.images = self.load_images(7) 
+        self.image = pygame.transform.rotate(self.images[self.frame], self.angle)
+        self.name = name
         self.next_x = 0
         self.next_y = 0
-        self.name = name
+        self.rate = 0.05
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = x, y
         self.score = 0 
-        self.game = game
+        self.time = 0
    
-    def move(self, x, y, blocchi):
+    def move(self, x, y, blocks):
         if self.animate_status is False:
-            for blocco in blocchi: 
-                if blocco.x == self.rect.left + x and blocco.y == self.rect.top + y:
-                    if blocco.status != "wall":
-                        self.scegli_angolo(x, y)
+            for block in blocks: 
+                if block.x == self.rect.left + x and block.y == self.rect.top + y:
+                    if block.status != "wall":
+                        self.set_angle(x, y)
                         self.animate_status = True
                         self.next_x = x
                         self.next_y = y
 
-                        if blocco.status != self.name and blocco.status != None and blocco.status != "wall":
+                        if block.status != self.name and block.status != None and block.status != "wall":
                             
-                            blocchi_da_eliminare = []
-                            for bl in blocchi:
+                            blocks_da_eliminare = []
+                            for bl in blocks:
                                 if bl.status == self.name:
-                                    blocchi_da_eliminare.append(bl)
+                                    blocks_da_eliminare.append(bl)
 
-                            if blocco.status == "booty":
-                                self.score += len(blocchi_da_eliminare) * 3 + self.game.tempo_attuale
+                            if block.status == "booty":
+                                self.score += len(blocks_da_eliminare) * 3 + self.game.tempo_attuale
                                 self.game.booty = False
                                 
                         
-                            for bl in blocchi_da_eliminare:
+                            for bl in blocks_da_eliminare:
                                 bl.status = None
                             
-                            blocco.status = self.name
+                            block.status = self.name
                     
                         else:
-                            blocco.status = self.name
-
-                    
-    def scegli_angolo(self, x, y):
-        if x > 0:
-            self.angle = 0
-        elif x < 0:
-            self.angle = 180
-        elif y > 0:
-            self.angle = -90
-        elif y < 0:
-            self.angle = 90
+                            block.status = self.name
 
     def animate(self, dt):
         if self.animate_status == True:
@@ -86,7 +75,7 @@ class Character(pygame.sprite.Sprite):
                         self.frame = 0
         else:
             self.image = pygame.transform.rotate(self.images[self.frame], self.angle)     
-
+    
     def load_images (self, n):
         images = []
 
@@ -97,6 +86,15 @@ class Character(pygame.sprite.Sprite):
 
         return images
     
+    def set_angle(self, x, y):
+        if x > 0:
+            self.angle = 0
+        elif x < 0:
+            self.angle = 180
+        elif y > 0:
+            self.angle = -90
+        elif y < 0:
+            self.angle = 90
         
         
 
