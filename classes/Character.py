@@ -40,9 +40,9 @@ class Character(pygame.sprite.Sprite):
                                 if bl.status == self.name:
                                     blocks_da_eliminare.append(bl)
 
-                            if block.status == "booty":
+                            if block.status == "placeholder":
                                 self.score += len(blocks_da_eliminare) * 3 + self.game.tempo_attuale
-                                self.game.booty = False
+                                self.game.placeholder = False
                                 
                         
                             for bl in blocks_da_eliminare:
@@ -75,7 +75,7 @@ class Character(pygame.sprite.Sprite):
                         self.frame = 0
         else:
             self.image = pygame.transform.rotate(self.images[self.frame], self.angle)     
-    
+
     def load_images (self, n):
         images = []
 

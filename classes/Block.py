@@ -4,3 +4,4 @@ class Block:
         self.y = y
         self.status = status
         self.color = color
+ 

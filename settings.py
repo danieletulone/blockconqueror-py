@@ -6,6 +6,7 @@ game_info = {
 
 blocks = {
     "wh": 42,
+    "wall_probability": 15
 }
 
 colors = {
@@ -17,7 +18,7 @@ colors = {
 
 clock = {
     "frame": 60,
-    "rate_booty": 10
+    "rate_placeholder": 10
 }
 
 grid = {
