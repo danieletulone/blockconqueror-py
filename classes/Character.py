@@ -40,9 +40,9 @@ class Character(pygame.sprite.Sprite):
                                 if bl.status == self.name:
                                     blocchi_da_eliminare.append(bl)
 
-                            if blocco.status == "bottino":
+                            if blocco.status == "booty":
                                 self.score += len(blocchi_da_eliminare) * 3 + self.game.tempo_attuale
-                                self.game.bottino = False
+                                self.game.booty = False
                                 
                         
                             for bl in blocchi_da_eliminare:

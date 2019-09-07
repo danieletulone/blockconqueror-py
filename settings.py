@@ -14,7 +14,8 @@ colors = {
 }
 
 clock = {
-    "frame": 60
+    "frame": 60,
+    "rate_booty": 10
 }
 
 grid = {
