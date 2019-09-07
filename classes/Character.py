@@ -4,14 +4,13 @@ import settings
 wh = settings.blocks["wh"]
 
 class Character(pygame.sprite.Sprite):
-    def __init__ (self, name, filename, x, y, color, initial_angle, game):
+    def __init__ (self, name, filename, x, y, color, initial_angle):
         pygame.sprite.Sprite. __init__ (self) 
         self.angle = initial_angle
         self.animate_status = False
         self.color = color
         self.filename = filename
         self.frame = 0
-        self.game = game
         self.images = self.load_images(7) 
         self.image = pygame.transform.rotate(self.images[self.frame], self.angle)
         self.name = name
@@ -23,7 +22,7 @@ class Character(pygame.sprite.Sprite):
         self.score = 0 
         self.time = 0
    
-    def move(self, x, y, blocks):
+    def move(self, x, y, blocks, game):
         if self.animate_status is False:
             for block in blocks: 
                 if block.x == self.rect.left + x and block.y == self.rect.top + y:
@@ -41,8 +40,8 @@ class Character(pygame.sprite.Sprite):
                                     blocks_da_eliminare.append(bl)
 
                             if block.status == "placeholder":
-                                self.score += len(blocks_da_eliminare) * 3 + self.game.tempo_attuale
-                                self.game.placeholder = False
+                                self.score += len(blocks_da_eliminare) * 3 + game.time
+                                game.placeholder = False
                                 
                         
                             for bl in blocks_da_eliminare:

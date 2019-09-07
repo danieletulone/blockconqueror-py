@@ -1,8 +1,4 @@
-game_info = {
-    "name": "BlockConqueror Py",
-    "author": "Daniele Tulone",
-    "graphic_design": "Mattia Guerriero"
-}
+import pygame
 
 blocks = {
     "wh": 42,
@@ -21,9 +17,30 @@ clock = {
     "rate_placeholder": 10
 }
 
+game_info = {
+    "name": "BlockConqueror Py",
+    "author": "Daniele Tulone",
+    "graphic_design": "Mattia Guerriero"
+}
+
 grid = {
     "colors": (colors["grey"], colors["white"])
 }
+
+keys = [
+    {
+        "down": pygame.K_DOWN, 
+        "left": pygame.K_LEFT,
+        "right": pygame.K_RIGHT,
+        "up": pygame.K_UP,
+    },
+    {
+        "down": pygame.K_s, 
+        "left": pygame.K_a,
+        "right": pygame.K_d,
+        "up": pygame.K_w,
+    },
+]
 
 screen = {
     "width": 1260,
