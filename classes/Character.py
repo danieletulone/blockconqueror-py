@@ -1,17 +1,16 @@
 import pygame
 import random
-import settings
-wh = settings.blocks["wh"]
+from settings import Settings
 
 class Character(pygame.sprite.Sprite):
-    def __init__ (self, name, filename, x, y, color, initial_angle):
-        pygame.sprite.Sprite. __init__ (self) 
+    def __init__ (self, name, filename, x, y, color, initial_angle, wh):
+        pygame.sprite.Sprite.__init__ (self) 
         self.angle = initial_angle
         self.animate_status = False
         self.color = color
         self.filename = filename
         self.frame = 0
-        self.images = self.load_images(7) 
+        self.images = self.load_images(7, wh) 
         self.image = pygame.transform.rotate(self.images[self.frame], self.angle)
         self.name = name
         self.next_x = 0
@@ -75,7 +74,7 @@ class Character(pygame.sprite.Sprite):
         else:
             self.image = pygame.transform.rotate(self.images[self.frame], self.angle)     
 
-    def load_images (self, n):
+    def load_images (self, n, wh):
         images = []
 
         for i in range(1, 8, 1):
@@ -94,10 +93,7 @@ class Character(pygame.sprite.Sprite):
             self.angle = -90
         elif y < 0:
             self.angle = 90
-        
-        
 
-
-    
-
+    def setKeys (self, keys):
+        pass
     

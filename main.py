@@ -3,21 +3,21 @@ import pygame
 from pygame.locals import *
 from classes.Character import Character
 from classes.Block import Block
-import settings
+from settings import Settings 
 
+settings = Settings()
 pygame.init()
 clock = pygame.time.Clock()
-pygame.mouse.set_visible(False)
-
 wh = settings.blocks["wh"]
 
 class Game:
     def __init__(self, name):
-        pygame.mouse.set_visible(False)
         pygame.display.set_caption(name)
-        self.screen = pygame.display.set_mode(settings.screen_tuple)           
-        self.insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", settings.screen_tuple[0] - wh, settings.screen_tuple[1] - wh, settings.colors["green"], 90)
-        self.bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", 0, 0, settings.colors["red"], -90)
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        settings.setSize(self.screen.get_size())      
+        pygame.mouse.set_visible(False)
+        self.insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", settings.screen_tuple[0] - settings.blocks["wh"], settings.screen_tuple[1] - settings.blocks["wh"], settings.colors["green"], 90, settings.blocks["wh"])
+        self.bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", 0, settings.layout["header"], settings.colors["red"], -90, settings.blocks["wh"])
         self.bricks = self.load_images()
         self.time = 0
         self.durata_partita = 100
@@ -31,6 +31,7 @@ class Game:
         self.rate_placeholder = settings.clock["rate_placeholder"]
         self.time_placeholder = 0
         self.random_block = False
+        self.loop()
 
     def animate (self):
         self.insalata.animate(self.dt)
@@ -66,6 +67,7 @@ class Game:
             print("Score bistecca: " + str(self.bistecca.score))
 
     def generate_map(self):
+        global settings
         color_prec_block = None
         
         grey, white = settings.grid["colors"]
@@ -73,14 +75,14 @@ class Game:
 
         blocks = []
 
-        for y in range(0, settings.screen["height"], wh):
+        for y in range(0, settings.layout["numbers_on_height"]):
             if color_prec_block is not None:
                 if color_prec_block == grey:
                     color = grey
                 else:
                     color = white
 
-            for x in range(0, settings.screen["width"], wh):
+            for x in range(0, settings.screen["width"], settings.blocks["wh"]):
                 if (color == white):
                     color = grey
                 else:
@@ -93,7 +95,7 @@ class Game:
                 else:
                     status = None
                 
-                new_block = Block(x, y, status, color)
+                new_block = Block(x, y * settings.blocks["wh"] + 120, status, color)
                 
                 if x == 0:
                     color_prec_block = new_block.color
@@ -161,26 +163,25 @@ class Game:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_DOWN]:
-            self.insalata.move(0, wh, self.blocks, self)
+            self.insalata.move(0, settings.blocks["wh"], self.blocks, self)
         if keys[pygame.K_UP]:
-            self.insalata.move(0, -wh, self.blocks, self)
+            self.insalata.move(0, -settings.blocks["wh"], self.blocks, self)
         if keys[pygame.K_RIGHT]:
-            self.insalata.move(wh, 0, self.blocks, self)
+            self.insalata.move(settings.blocks["wh"], 0, self.blocks, self)
         if keys[pygame.K_LEFT]:
-            self.insalata.move(-wh, 0, self.blocks, self)
+            self.insalata.move(-settings.blocks["wh"], 0, self.blocks, self)
         
         if keys[pygame.K_s]:
-            self.bistecca.move(0, wh, self.blocks, self)
+            self.bistecca.move(0, settings.blocks["wh"], self.blocks, self)
         if keys[pygame.K_w]:
-            self.bistecca.move(0, -wh, self.blocks, self)
+            self.bistecca.move(0, -settings.blocks["wh"], self.blocks, self)
         if keys[pygame.K_d]:
-            self.bistecca.move(wh, 0, self.blocks, self)
+            self.bistecca.move(settings.blocks["wh"], 0, self.blocks, self)
         if keys[pygame.K_a]:
-            self.bistecca.move(-wh, 0, self.blocks, self)
+            self.bistecca.move(-settings.blocks["wh"], 0, self.blocks, self)
 
     def play_music(self):
         pygame.mixer.music.load('assets/bk.mp3')
         pygame.mixer.music.play(-1)
 
 game = Game(settings.game_info["name"])
-game.loop()
