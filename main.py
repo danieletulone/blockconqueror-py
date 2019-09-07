@@ -1,30 +1,26 @@
-# Importo i moduli necessari
+import random
 import pygame
 from pygame.locals import *
-import random
-from personaggio import Personaggio
-from classes.blocco import Blocco
+from classes.Character import Character
+from classes.Block import Block
+import settings
 
-#inizializzo Pygame
 pygame.init()
 clock = pygame.time.Clock()
 pygame.mouse.set_visible(False)
 
-# Altezza e larghezza di ogni singolo blocco che compongae lo screen
-wh = 42
+wh = settings.blocks["wh"]
 
 class Game:
     def __init__(self, name):
-        self.screen = pygame.display.set_mode((1260, 546))
+        self.screen = pygame.display.set_mode(settings.screen_tuple)
         pygame.mouse.set_visible(False)
         self.size = self.screen.get_size()
-
-        # Inserisce il titolo del gioco alla finestra
         pygame.display.set_caption(name) 
         
-        # Setto le due istanze della classe Personaggio                                         
-        self.insalata = Personaggio("insalata", "assets/insalata/camminata/Tavola disegno ", self.size[0] - wh, self.size[1] - wh, (193, 206, 99), 90, self)
-        self.bistecca = Personaggio("bistecca", "assets/bistecca/camminata/Tavola disegno ", 0, 0, (203, 42, 46), -90, self)
+        # Setto le due istanze della classe Character                                         
+        self.insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", self.size[0] - wh, self.size[1] - wh, (193, 206, 99), 90, self)
+        self.bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", 0, 0, (203, wh, 46), -90, self)
         
         # Tempo Attuale e Durata Totale Partita
         self.tempo_attuale = 0
@@ -33,7 +29,7 @@ class Game:
         # Lista Blocchi
         self.blocchi = self.genera_mappa()
 
-        # Cerco e coloro il primo blocco dei personaggi
+        # Cerco e coloro il primo block dei personaggi
         self.primo_blocco(self.insalata)
         self.primo_blocco(self.bistecca)
 
@@ -57,38 +53,35 @@ class Game:
 
         self.random_block = False
 
-    def primo_blocco(self, personaggio):
-        # Metodo first_block, attraverso la ricerca nella lista blocchi, la funzione troverà la posizione del blocco corrispondente alla posizione del 
-        # personaggio di riferimento, se la trova allora colora il quadrato iniziale del colore assegnato in self.name al personaggio 
-        for blocco in self.blocchi:
-            if blocco.x == personaggio.rect.left and blocco.y == personaggio.rect.top:
-                blocco.status = personaggio.name
+    def primo_blocco(self, character):
+        for block in self.blocchi:
+            if block.x == character.rect.left and block.y == character.rect.top:
+                block.status = character.name
                 break
 
     def genera_mappa(self):
-        # Terrà a memoria il colore del blocco precendente per quando deve creare la mappa
+        # Terrà a memoria il color del block precendente per quando deve creare la mappa
         colore_del_blocco_precedente = None
         
         # Variabili Colori
-        grey = 240, 240, 240
-        white = 255, 255, 255
-        colore = grey
+        grey, white = settings.grid["colors"]
+        color = grey
 
         blocchi = []
 
-        for y in range(0, 546, 42):
+        for y in range(0, 546, wh):
             if colore_del_blocco_precedente is not None:
                 if colore_del_blocco_precedente == grey:
-                    colore = grey
+                    color = grey
                 else:
-                    colore = white
+                    color = white
 
-            for x in range(0, 1260, 42):
+            for x in range(0, 1260, wh):
 
-                if (colore == white):
-                    colore = grey
+                if (color == white):
+                    color = grey
                 else:
-                    colore = white
+                    color = white
             
                 r = random.randint(0, 100)
                 if (r > random.randint(90, 100)):
@@ -96,9 +89,9 @@ class Game:
                 else:
                     status = None
                 
-                blocconuovo = Blocco(x, y, status, colore)
+                blocconuovo = Block(x, y, status, color)
                 if x == 0:
-                    colore_del_blocco_precedente = blocconuovo.colore
+                    colore_del_blocco_precedente = blocconuovo.color
                 blocchi.append(blocconuovo)
     
         return blocchi
@@ -106,7 +99,7 @@ class Game:
     def loop(self):
         while self.loop_status:
             # Setto il delta time, clock tik 60 frame al secondo = 17, 
-            self.dt = clock.tick(120) / 1000
+            self.dt = clock.tick(settings.clock["frame"]) / 1000
 
             # Incremento la variabile time usata per generate ogni tot il bottino
             self.time_bottino += self.dt
@@ -119,13 +112,13 @@ class Game:
                  
                  while cerca_blocco:
 
-                     r_x = random.randrange(0, 1260 - 42, 42)
-                     r_y = random.randrange(0, 546 - 42, 42)
+                     r_x = random.randrange(0, 1260 - wh, wh)
+                     r_y = random.randrange(0, 546 - wh, wh)
 
-                     for blocco in self.blocchi:
-                         if blocco.x == r_x and blocco.y == r_y:
-                             if blocco.status == None:
-                                 blocco.status = "bottino"
+                     for block in self.blocchi:
+                         if block.x == r_x and block.y == r_y:
+                             if block.status == None:
+                                 block.status = "bottino"
 
                                  cerca_blocco = False
                                  self.time_bottino = 0
@@ -134,31 +127,25 @@ class Game:
 
             elif self.time_bottino > self.rate_bottino and self.bottino == True:
 
-                for blocco in self.blocchi:
-                    if blocco.status == "bottino":
-                        blocco.status = None
+                for block in self.blocchi:
+                    if block.status == "bottino":
+                        block.status = None
 
                         self.bottino = False
                         break
-
-            # Cerco gli eventi: pulsante esc, pulsantiere giocatori o click sulla x della finestra
+    
             self.cerco_eventi()
-            
-            # Metodo per disegnare la mappa
+        
             self.disegna_mappa()
             
-            # Metodo per disegnare i personaggi e animarli
             self.disegna_e_anima_personaggi()
 
-            # Controllo se la partita può continuare o terminare
             self.controlla_stato_partita()
 
-            # Metodo di pygame per aggiornare l'intera superficie della finistra/schermo
             pygame.display.flip()
     
     def avvia_musica(self):
-        # Carico and Eseguo la musica: -1 sta per loop infinito
-        pygame.mixer.music.load('bk.mp3')
+        pygame.mixer.music.load('assets/bk.mp3')
         pygame.mixer.music.play(-1)
     
     def controlla_stato_partita(self):
@@ -204,13 +191,13 @@ class Game:
             if i.status == "wall":
                 pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(i.x, i.y, wh, wh))
             elif i.status == "insalata":
-                pygame.draw.rect(self.screen, self.insalata.colore, pygame.Rect(i.x, i.y, wh, wh))
+                pygame.draw.rect(self.screen, self.insalata.color, pygame.Rect(i.x, i.y, wh, wh))
             elif i.status == "bistecca":
-                pygame.draw.rect(self.screen, self.bistecca.colore, pygame.Rect(i.x, i.y, wh, wh))
+                pygame.draw.rect(self.screen, self.bistecca.color, pygame.Rect(i.x, i.y, wh, wh))
             elif i.status == "bottino":
                 pygame.draw.rect(self.screen, (0, 0, 255), pygame.Rect(i.x, i.y, wh, wh))
             else:
-                pygame.draw.rect(self.screen, (i.colore), pygame.Rect(i.x, i.y, wh, wh))
+                pygame.draw.rect(self.screen, (i.color), pygame.Rect(i.x, i.y, wh, wh))
 
     def disegna_e_anima_personaggi(self):
         self.screen.blit(self.insalata.image, self.insalata.rect)    
@@ -218,5 +205,5 @@ class Game:
         self.insalata.animate(self.dt)
         self.bistecca.animate(self.dt)
 
-game = Game("Is Not A Food War")
+game = Game(settings.game_info["name"])
 game.loop()
