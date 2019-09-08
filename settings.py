@@ -16,7 +16,8 @@ class Settings:
 
         self.clock = {
             "frame": 60,
-            "rate_placeholder": 10
+            "rate_placeholder": 10,
+            "game_duration": 100
         }
 
         self.game_info = {
@@ -50,27 +51,21 @@ class Settings:
         ]
 
         self.screen = {
-            "width": 1260,
-            "height": 546,
+            "width": None,
+            "height": None,
             "frame": 60
         }
 
-        self.screen_tuple = (1260, 546)
-
     def setSize (self, size):
-        self.screen_tuple = size
-        self.screen["width"] = size[0]
+        self.screen_tuple = size[0] - (size[0] % self.blocks["wh"]), size[1]
+        self.screen["width"] = size[0] - (size[0] % self.blocks["wh"])
         self.screen["height"] = size[1]
         self.calculateWh()
+        print(self.screen)
 
-    def calculateWh (self):
-        for i in range(40, 60):
-            if self.screen["width"] % i == 0:
-                self.blocks["wh"] = i 
-                break
-
+    def calculateWh (self): 
         self.layout["header"] = self.layout["header"] + (self.screen["height"] - self.layout["header"]) % self.blocks["wh"]
         self.layout["body"] = self.screen["height"] - self.layout["header"]
         self.layout["numbers_on_height"] = int(self.layout["body"] / self.blocks["wh"])
-        
+        self.layout["numbers_on_width"] = int(self.screen["width"] / self.blocks["wh"])
         print(self.layout)

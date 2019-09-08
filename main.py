@@ -8,7 +8,6 @@ from settings import Settings
 settings = Settings()
 pygame.init()
 clock = pygame.time.Clock()
-wh = settings.blocks["wh"]
 
 class Game:
     def __init__(self, name):
@@ -16,26 +15,26 @@ class Game:
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         settings.setSize(self.screen.get_size())      
         pygame.mouse.set_visible(False)
-        self.insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", settings.screen_tuple[0] - settings.blocks["wh"], settings.screen_tuple[1] - settings.blocks["wh"], settings.colors["green"], 90, settings.blocks["wh"])
-        self.bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", 0, settings.layout["header"], settings.colors["red"], -90, settings.blocks["wh"])
         self.bricks = self.load_images()
         self.time = 0
-        self.durata_partita = 100
         self.blocks = self.generate_map()
+        self.bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", self.blocks[0], 0, settings.colors["red"], -90, settings.layout["numbers_on_width"])
+        self.insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90, settings.layout["numbers_on_width"])
         self.dt = 0
         self.loop_status = True
         self.play_music()
         self.placeholder = False
         self.placeholder_block = None
-        self.placeholder_image = pygame.transform.smoothscale(pygame.image.load("assets/placeholder.png").convert_alpha(), (wh, wh))
+        self.placeholder_image = pygame.transform.smoothscale(pygame.image.load("assets/placeholder.png").convert_alpha(), (settings.blocks["wh"], settings.blocks["wh"]))
         self.rate_placeholder = settings.clock["rate_placeholder"]
         self.time_placeholder = 0
         self.random_block = False
+        self.to_render = []
         self.loop()
 
     def animate (self):
-        self.insalata.animate(self.dt)
-        self.bistecca.animate(self.dt)
+        self.insalata.animate(self.dt, self)
+        self.bistecca.animate(self.dt, self)
 
     def draw (self):
         self.screen.blit(self.insalata.image, self.insalata.rect)    
@@ -61,13 +60,12 @@ class Game:
                 pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
     
     def end_game(self):
-        if self.time > self.durata_partita:
+        if self.time > settings.clock["game_duration"]:
             self.loop_status = False
             print("Score insalata: " + str(self.insalata.score))
             print("Score bistecca: " + str(self.bistecca.score))
 
     def generate_map(self):
-        global settings
         color_prec_block = None
         
         grey, white = settings.grid["colors"]
@@ -95,7 +93,7 @@ class Game:
                 else:
                     status = None
                 
-                new_block = Block(x, y * settings.blocks["wh"] + 120, status, color)
+                new_block = Block(x, y * settings.blocks["wh"] + settings.layout["header"], status, color)
                 
                 if x == 0:
                     color_prec_block = new_block.color
@@ -116,7 +114,11 @@ class Game:
         return bricks
 
     def loop(self):
+        self.draw_map()
+
         while self.loop_status:
+            self.to_render = []
+            
             self.dt = clock.tick(settings.clock["frame"]) / 1000
             self.time_placeholder += self.dt
             self.time += self.dt
@@ -146,8 +148,24 @@ class Game:
                         break
     
             self.on_events()
-            self.draw_map()
+            wh = settings.blocks["wh"]
             self.draw()
+            for i in self.to_render:
+                i = self.blocks[i]
+                if i.status == "wall":
+                    pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
+                    self.screen.blit(self.bricks["wall"], pygame.Rect(i.x, i.y, wh, wh))
+                elif i.status == "insalata":
+                    pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
+                    pygame.draw.rect(self.screen, self.insalata.color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
+                elif i.status == "bistecca":
+                    pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
+                    pygame.draw.rect(self.screen, self.bistecca.color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
+                elif i.status == "placeholder":
+                    pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
+                    self.screen.blit(self.placeholder_image, pygame.Rect(i.x, i.y, wh, wh))
+                else:
+                    pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
             self.animate()
             self.end_game()
             pygame.display.flip()
@@ -163,22 +181,22 @@ class Game:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_DOWN]:
-            self.insalata.move(0, settings.blocks["wh"], self.blocks, self)
+            self.insalata.move(self.insalata.current_block + settings.layout["numbers_on_width"], self.blocks, self)
         if keys[pygame.K_UP]:
-            self.insalata.move(0, -settings.blocks["wh"], self.blocks, self)
+            self.insalata.move(self.insalata.current_block - settings.layout["numbers_on_width"], self.blocks, self)
         if keys[pygame.K_RIGHT]:
-            self.insalata.move(settings.blocks["wh"], 0, self.blocks, self)
+            self.insalata.move(self.insalata.current_block + 1, self.blocks, self)
         if keys[pygame.K_LEFT]:
-            self.insalata.move(-settings.blocks["wh"], 0, self.blocks, self)
+            self.insalata.move(self.insalata.current_block - 1, self.blocks, self)
         
         if keys[pygame.K_s]:
-            self.bistecca.move(0, settings.blocks["wh"], self.blocks, self)
+            self.bistecca.move(self.bistecca.current_block + settings.layout["numbers_on_width"], self.blocks, self)
         if keys[pygame.K_w]:
-            self.bistecca.move(0, -settings.blocks["wh"], self.blocks, self)
+            self.bistecca.move(self.bistecca.current_block - settings.layout["numbers_on_width"], self.blocks, self)
         if keys[pygame.K_d]:
-            self.bistecca.move(settings.blocks["wh"], 0, self.blocks, self)
+            self.bistecca.move(self.bistecca.current_block + 1, self.blocks, self)
         if keys[pygame.K_a]:
-            self.bistecca.move(-settings.blocks["wh"], 0, self.blocks, self)
+            self.bistecca.move(self.bistecca.current_block - 1, self.blocks, self)
 
     def play_music(self):
         pygame.mixer.music.load('assets/bk.mp3')
