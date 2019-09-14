@@ -35,7 +35,7 @@ class Character(pygame.sprite.Sprite):
 
                 block = blocks[block_index]
                 if block.status != "wall":
-                    game.to_render.append(self.current_block)
+                    self.prec_block = self.current_block
                     self.set_angle(block_index)
                     self.current_block = block_index
                     self.blocks.append(block_index)
@@ -62,19 +62,18 @@ class Character(pygame.sprite.Sprite):
 
                         for bl in self.blocks:
                             blocks[bl].status = None
-                            game.to_render.append(bl)
                 
                     block.status = self.name
 
                     for bl in self.blocks:
                         game.to_render.append(bl)
-                    
-                    game.to_render.append(self.current_block)
 
     def animate(self, dt = 0, game = None):
 
         if self.animate_status == True:
-            self.time += dt 
+            
+            game.to_render.append(self.current_block)
+            self.time += dt
 
             if self.time > self.rate:
                 self.frame += 1
@@ -92,10 +91,10 @@ class Character(pygame.sprite.Sprite):
 
                     if self.frame == 6:
                         self.frame = 0
+                game.to_render.append(self.prec_block)
+                game.to_render.append(self.current_block)        
         else:
             self.image = pygame.transform.rotate(self.images[self.frame], self.angle)
-        
-        game.to_render.append(self.current_block) 
 
     def load_images (self, n, wh):
         images = []

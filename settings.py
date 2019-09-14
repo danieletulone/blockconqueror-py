@@ -4,7 +4,7 @@ class Settings:
     def __init__(self):
         self.blocks = {
             "wh": 40,
-            "wall_probability": 15
+            "wall_probability": 5
         }
 
         self.colors = {

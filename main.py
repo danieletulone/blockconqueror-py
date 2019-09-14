@@ -18,8 +18,9 @@ class Game:
         self.bricks = self.load_images()
         self.time = 0
         self.blocks = self.generate_map()
-        self.bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", self.blocks[0], 0, settings.colors["red"], -90, settings.layout["numbers_on_width"])
-        self.insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90, settings.layout["numbers_on_width"])
+        bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", self.blocks[0], 0, settings.colors["red"], -90, settings.layout["numbers_on_width"])
+        insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90, settings.layout["numbers_on_width"])
+        self.characters = [bistecca, insalata]
         self.dt = 0
         self.loop_status = True
         self.play_music()
@@ -33,12 +34,13 @@ class Game:
         self.loop()
 
     def animate (self):
-        self.insalata.animate(self.dt, self)
-        self.bistecca.animate(self.dt, self)
+        for c in self.characters:
+            c.animate(self.dt, self)
 
     def draw (self):
-        self.screen.blit(self.insalata.image, self.insalata.rect)    
-        self.screen.blit(self.bistecca.image, self.bistecca.rect)
+        for c in self.characters:
+            pygame.draw.rect(self.screen, (255, 255, 255), c.rect)
+            self.screen.blit(c.image, c.rect)    
 
     def draw_map(self):
         wh = settings.blocks["wh"]
@@ -49,10 +51,10 @@ class Game:
                 self.screen.blit(self.bricks["wall"], pygame.Rect(i.x, i.y, wh, wh))
             elif i.status == "insalata":
                 pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
-                pygame.draw.rect(self.screen, self.insalata.color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
+                pygame.draw.rect(self.screen, self.characters[1].color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
             elif i.status == "bistecca":
                 pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
-                pygame.draw.rect(self.screen, self.bistecca.color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
+                pygame.draw.rect(self.screen, self.characters[0].color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
             elif i.status == "placeholder":
                 pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
                 self.screen.blit(self.placeholder_image, pygame.Rect(i.x, i.y, wh, wh))
@@ -62,8 +64,6 @@ class Game:
     def end_game(self):
         if self.time > settings.clock["game_duration"]:
             self.loop_status = False
-            print("Score insalata: " + str(self.insalata.score))
-            print("Score bistecca: " + str(self.bistecca.score))
 
     def generate_map(self):
         color_prec_block = None
@@ -74,29 +74,15 @@ class Game:
         blocks = []
 
         for y in range(0, settings.layout["numbers_on_height"]):
-            if color_prec_block is not None:
-                if color_prec_block == grey:
-                    color = grey
-                else:
-                    color = white
-
             for x in range(0, settings.screen["width"], settings.blocks["wh"]):
-                if (color == white):
-                    color = grey
-                else:
-                    color = white
-            
                 r = random.randint(0, 100)
 
                 if (r > random.randint(100 - settings.blocks["wall_probability"], 100)):
                     status = "wall"
                 else:
                     status = None
-                
-                new_block = Block(x, y * settings.blocks["wh"] + settings.layout["header"], status, color)
-                
-                if x == 0:
-                    color_prec_block = new_block.color
+
+                new_block = Block(x, y * settings.blocks["wh"] + settings.layout["header"], status)
 
                 blocks.append(new_block)
     
@@ -118,7 +104,6 @@ class Game:
 
         while self.loop_status:
             self.to_render = []
-            
             self.dt = clock.tick(settings.clock["frame"]) / 1000
             self.time_placeholder += self.dt
             self.time += self.dt
@@ -133,10 +118,11 @@ class Game:
 
                     if random_block.status == None:
                         random_block.status = "placeholder"
-                        self.placeholder_block = random_block.status
+                        self.placeholder_block = random_index
                         self.time_placeholder = 0
                         self.placeholder = True
                         seekEmptyBlock = False
+                        self.to_render.append(self.placeholder_block)
 
             elif self.time_placeholder > self.rate_placeholder and self.placeholder == True:
 
@@ -149,24 +135,27 @@ class Game:
     
             self.on_events()
             wh = settings.blocks["wh"]
-            self.draw()
+            
+            self.animate()
+
             for i in self.to_render:
+                w = i
                 i = self.blocks[i]
                 if i.status == "wall":
                     pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
                     self.screen.blit(self.bricks["wall"], pygame.Rect(i.x, i.y, wh, wh))
                 elif i.status == "insalata":
                     pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
-                    pygame.draw.rect(self.screen, self.insalata.color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
+                    pygame.draw.rect(self.screen, self.characters[1].color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
                 elif i.status == "bistecca":
                     pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
-                    pygame.draw.rect(self.screen, self.bistecca.color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
+                    pygame.draw.rect(self.screen, self.characters[0].color, pygame.Rect(i.x + 16, i.y + 16, wh - 32, wh - 32))
                 elif i.status == "placeholder":
                     pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
                     self.screen.blit(self.placeholder_image, pygame.Rect(i.x, i.y, wh, wh))
                 else:
                     pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(i.x, i.y, wh, wh))
-            self.animate()
+            self.draw()
             self.end_game()
             pygame.display.flip()
 
@@ -181,22 +170,22 @@ class Game:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_DOWN]:
-            self.insalata.move(self.insalata.current_block + settings.layout["numbers_on_width"], self.blocks, self)
+            self.characters[1].move(self.characters[1].current_block + settings.layout["numbers_on_width"], self.blocks, self)
         if keys[pygame.K_UP]:
-            self.insalata.move(self.insalata.current_block - settings.layout["numbers_on_width"], self.blocks, self)
+            self.characters[1].move(self.characters[1].current_block - settings.layout["numbers_on_width"], self.blocks, self)
         if keys[pygame.K_RIGHT]:
-            self.insalata.move(self.insalata.current_block + 1, self.blocks, self)
+            self.characters[1].move(self.characters[1].current_block + 1, self.blocks, self)
         if keys[pygame.K_LEFT]:
-            self.insalata.move(self.insalata.current_block - 1, self.blocks, self)
+            self.characters[1].move(self.characters[1].current_block - 1, self.blocks, self)
         
         if keys[pygame.K_s]:
-            self.bistecca.move(self.bistecca.current_block + settings.layout["numbers_on_width"], self.blocks, self)
+            self.characters[0].move(self.characters[0].current_block + settings.layout["numbers_on_width"], self.blocks, self)
         if keys[pygame.K_w]:
-            self.bistecca.move(self.bistecca.current_block - settings.layout["numbers_on_width"], self.blocks, self)
+            self.characters[0].move(self.characters[0].current_block - settings.layout["numbers_on_width"], self.blocks, self)
         if keys[pygame.K_d]:
-            self.bistecca.move(self.bistecca.current_block + 1, self.blocks, self)
+            self.characters[0].move(self.characters[0].current_block + 1, self.blocks, self)
         if keys[pygame.K_a]:
-            self.bistecca.move(self.bistecca.current_block - 1, self.blocks, self)
+            self.characters[0].move(self.characters[0].current_block - 1, self.blocks, self)
 
     def play_music(self):
         pygame.mixer.music.load('assets/bk.mp3')
