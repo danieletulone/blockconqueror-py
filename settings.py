@@ -56,16 +56,14 @@ class Settings:
             "frame": 60
         }
 
-    def setSize (self, size):
+    def setSize(self, size):
         self.screen_tuple = size[0] - (size[0] % self.blocks["wh"]), size[1]
         self.screen["width"] = size[0] - (size[0] % self.blocks["wh"])
         self.screen["height"] = size[1]
         self.calculateWh()
-        print(self.screen)
 
-    def calculateWh (self): 
+    def calculateWh(self): 
         self.layout["header"] = self.layout["header"] + (self.screen["height"] - self.layout["header"]) % self.blocks["wh"]
         self.layout["body"] = self.screen["height"] - self.layout["header"]
         self.layout["numbers_on_height"] = int(self.layout["body"] / self.blocks["wh"])
         self.layout["numbers_on_width"] = int(self.screen["width"] / self.blocks["wh"])
-        print(self.layout)

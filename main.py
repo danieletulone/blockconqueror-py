@@ -4,6 +4,7 @@ from pygame.locals import *
 from classes.Character import Character
 from classes.Block import Block
 from settings import Settings 
+from helpers.image import loadPng, resize
 
 settings = Settings()
 pygame.init()
@@ -24,7 +25,7 @@ class Game:
         self.play_music()
         self.placeholder = False
         self.placeholder_block = None
-        self.placeholder_image = pygame.transform.smoothscale(pygame.image.load("assets/placeholder.png").convert_alpha(), (settings.blocks["wh"], settings.blocks["wh"]))
+        self.placeholder_image = resize(loadPng("assets", "placeholder"), settings.blocks["wh"], settings.blocks["wh"])
         self.rate_placeholder = settings.clock["rate_placeholder"]
         self.time_placeholder = 0
         self.random_block = False
@@ -90,9 +91,9 @@ class Game:
         wh = settings.blocks["wh"]
         
         bricks = {
-            "wall": pygame.transform.smoothscale(pygame.image.load("assets/bricks/mansory.png").convert_alpha(), (wh + 10, wh + 10)),
-            "lightning": pygame.transform.smoothscale(pygame.image.load("assets/weapons/lightning.png").convert_alpha(), (wh, wh)),
-            "fist": pygame.transform.smoothscale(pygame.image.load("assets/weapons/fist.png").convert_alpha(), (wh, wh)),
+            "wall": resize(loadPng("assets/bricks", "mansory"), wh + 10, wh + 10),
+            "lightning": resize(loadPng("assets/weapons", "lightning"), wh, wh),
+            "fist": resize(loadPng("assets/weapons", "fist"), wh, wh),
         }
 
         return bricks
@@ -182,8 +183,8 @@ class Game:
         pygame.mixer.music.play(-1)
 
     def setCharacters(self):
-        bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", self.blocks[0], 0, settings.colors["red"], -90, settings.layout["numbers_on_width"])
-        insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90, settings.layout["numbers_on_width"])
+        bistecca = Character("bistecca", self.blocks[0], 0, settings.colors["red"], -90, settings.layout["numbers_on_width"])
+        insalata = Character("insalata", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90, settings.layout["numbers_on_width"])
         return [bistecca, insalata]
 
 game = Game()

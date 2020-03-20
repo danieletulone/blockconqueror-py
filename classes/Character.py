@@ -1,11 +1,12 @@
 import pygame
 import random
 from settings import Settings
+from helpers.image import loadPng, resize
 
 settings = Settings()
 
 class Character(pygame.sprite.Sprite):
-    def __init__ (self, name, filename, block, block_index, color, initial_angle, on_width):
+    def __init__ (self, name, block, block_index, color, initial_angle, on_width):
         pygame.sprite.Sprite.__init__ (self) 
         wh = settings.blocks["wh"]
         self.angle = initial_angle
@@ -13,8 +14,9 @@ class Character(pygame.sprite.Sprite):
         self.blocks = [block_index]
         self.current_block = block_index
         self.color = color
-        self.filename = filename
         self.frame = 0
+        self.path = "assets/" + name + "/camminata"
+        self.filename = "Tavola Disegno "
         self.images = self.load_images(7, wh) 
         self.image = pygame.transform.rotate(self.images[self.frame], self.angle)
         self.name = name
@@ -36,7 +38,7 @@ class Character(pygame.sprite.Sprite):
                 block = blocks[block_index]
                 if block.status != "wall":
                     self.prec_block = self.current_block
-                    self.set_angle(block_index)
+                    self.setAngle(block_index)
                     self.current_block = block_index
                     self.blocks.append(block_index)
                     self.animate_status = True
@@ -96,17 +98,15 @@ class Character(pygame.sprite.Sprite):
         else:
             self.image = pygame.transform.rotate(self.images[self.frame], self.angle)
 
-    def load_images (self, n, wh):
+    def load_images(self, n, wh):
         images = []
 
         for i in range(1, 8, 1):
-            image = pygame.image.load(self.filename + str(i) + ".png").convert_alpha()
-            image = pygame.transform.smoothscale(image, (wh, wh))
-            images.append(image)
+            images.append(resize(loadPng(self.path, self.filename + str(i)), wh, wh))
 
         return images
     
-    def set_angle(self, block_index):
+    def setAngle(self, block_index):
         if block_index == self.current_block + 1:
             self.angle = 0
         elif block_index == self.current_block - 1:
@@ -117,5 +117,5 @@ class Character(pygame.sprite.Sprite):
             self.angle = 90
 
     def setKeys (self, keys):
-        pass
+        self.keys = keys
     
