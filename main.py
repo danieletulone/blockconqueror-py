@@ -10,17 +10,15 @@ pygame.init()
 clock = pygame.time.Clock()
 
 class Game:
-    def __init__(self, name):
-        pygame.display.set_caption(name)
+    def __init__(self):
+        pygame.display.set_caption(settings.game_info["name"])
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         settings.setSize(self.screen.get_size())      
         pygame.mouse.set_visible(False)
         self.bricks = self.load_images()
         self.time = 0
         self.blocks = self.generate_map()
-        bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", self.blocks[0], 0, settings.colors["red"], -90, settings.layout["numbers_on_width"])
-        insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90, settings.layout["numbers_on_width"])
-        self.characters = [bistecca, insalata]
+        self.characters = self.setCharacters()
         self.dt = 0
         self.loop_status = True
         self.play_music()
@@ -168,27 +166,24 @@ class Game:
                     self.loop_status = False
 
         keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_DOWN]:
-            self.characters[1].move(self.characters[1].current_block + settings.layout["numbers_on_width"], self.blocks, self)
-        if keys[pygame.K_UP]:
-            self.characters[1].move(self.characters[1].current_block - settings.layout["numbers_on_width"], self.blocks, self)
-        if keys[pygame.K_RIGHT]:
-            self.characters[1].move(self.characters[1].current_block + 1, self.blocks, self)
-        if keys[pygame.K_LEFT]:
-            self.characters[1].move(self.characters[1].current_block - 1, self.blocks, self)
         
-        if keys[pygame.K_s]:
-            self.characters[0].move(self.characters[0].current_block + settings.layout["numbers_on_width"], self.blocks, self)
-        if keys[pygame.K_w]:
-            self.characters[0].move(self.characters[0].current_block - settings.layout["numbers_on_width"], self.blocks, self)
-        if keys[pygame.K_d]:
-            self.characters[0].move(self.characters[0].current_block + 1, self.blocks, self)
-        if keys[pygame.K_a]:
-            self.characters[0].move(self.characters[0].current_block - 1, self.blocks, self)
+        for i in range(2):
+            if keys[settings.keys[i]["down"]]:
+                self.characters[i].move(self.characters[i].current_block + settings.layout["numbers_on_width"], self.blocks, self)
+            if keys[settings.keys[i]["up"]]:
+                self.characters[i].move(self.characters[i].current_block - settings.layout["numbers_on_width"], self.blocks, self)
+            if keys[settings.keys[i]["right"]]:
+                self.characters[i].move(self.characters[i].current_block + 1, self.blocks, self)
+            if keys[settings.keys[i]["left"]]:
+                self.characters[i].move(self.characters[i].current_block - 1, self.blocks, self)
 
     def play_music(self):
         pygame.mixer.music.load('assets/bk.mp3')
         pygame.mixer.music.play(-1)
 
-game = Game(settings.game_info["name"])
+    def setCharacters(self):
+        bistecca = Character("bistecca", "assets/bistecca/camminata/Tavola disegno ", self.blocks[0], 0, settings.colors["red"], -90, settings.layout["numbers_on_width"])
+        insalata = Character("insalata", "assets/insalata/camminata/Tavola disegno ", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90, settings.layout["numbers_on_width"])
+        return [bistecca, insalata]
+
+game = Game()
