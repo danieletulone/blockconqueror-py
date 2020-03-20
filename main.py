@@ -183,8 +183,8 @@ class Game:
         pygame.mixer.music.play(-1)
 
     def setCharacters(self):
-        bistecca = Character("bistecca", self.blocks[0], 0, settings.colors["red"], -90, settings.layout["numbers_on_width"])
-        insalata = Character("insalata", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90, settings.layout["numbers_on_width"])
+        bistecca = Character("bistecca", self.blocks[0], 0, settings.colors["red"], -90)
+        insalata = Character("insalata", self.blocks[len(self.blocks) - 1], len(self.blocks) - 1, settings.colors["green"], 90)
         return [bistecca, insalata]
 
 game = Game()

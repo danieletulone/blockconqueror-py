@@ -6,7 +6,7 @@ from helpers.image import loadPng, resize
 settings = Settings()
 
 class Character(pygame.sprite.Sprite):
-    def __init__ (self, name, block, block_index, color, initial_angle, on_width):
+    def __init__ (self, name, block, block_index, color, initial_angle):
         pygame.sprite.Sprite.__init__ (self) 
         wh = settings.blocks["wh"]
         self.angle = initial_angle
@@ -27,7 +27,7 @@ class Character(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = block.x, block.y
         self.score = 0 
         self.time = 0
-        self.on_width = on_width
+        self.on_width = settings.layout["numbers_on_width"]
    
     def move(self, block_index, blocks, game):
         if self.animate_status is False:
